@@ -1,0 +1,140 @@
+Instagram-Style App: Model Design (MVP)
+=======================================
+
+This document describes a small Django data model for the requested features.
+It is a design proposal; it does not create or migrate these models.
+
+1. User (Django built-in: django.contrib.auth.models.User)
+----------------------------------------------------------
+Purpose:
+    Stores the login identity and authentication data for each account.
+    Use Django's built-in password hashing, login, and password-reset flows.
+
+Fields to use:
+    username       built-in, unique login/search name
+    email          built-in; collect and verify it for account recovery
+    password       built-in, stored only as a secure hash
+    first_name     built-in, optional
+    last_name      built-in, optional
+    is_active      built-in, account enabled/disabled state
+    date_joined    built-in, account creation time
+
+Do not add a custom password or password-reset-token column. Django's auth
+system handles password changes and reset tokens.
+
+2. Profile
+----------
+Purpose:
+    Holds editable public-facing information that does not belong to login
+    credentials. Create one profile per user.
+
+Fields:
+    id             primary key
+    user_id        OneToOne foreign key to User; required, unique
+    display_name   optional name shown on the profile
+    bio            optional profile description
+    avatar         optional ImageField/FileField for the profile picture
+    created_at     timestamp when the profile was created
+    updated_at     timestamp of the latest profile edit
+
+3. Post
+-------
+Purpose:
+    Represents a user's photo or video post. Store the uploaded file in media
+    storage and keep its path/reference in the database, not the file bytes.
+
+Fields:
+    id             primary key
+    user_id        foreign key to User; post owner
+    media_file     FileField; required image/video upload
+    media_type     choice such as "image" or "video"
+    caption        optional text
+    visibility     choice such as "public" or "followers"
+    created_at     timestamp; use for newest-first feed ordering
+    updated_at     timestamp of the latest post edit
+
+Validate that the uploaded file is an allowed image or video and that
+media_type matches it. Enforce upload size/type limits in the application.
+The MVP feed can query public posts, excluding the signed-in user's own posts
+if the screen specifically means "someone else's" content. Add follower-only
+access checks if that visibility option is implemented.
+
+4. Follow
+----------
+Purpose:
+    Records one account following another. Each row is a directed relationship.
+
+Fields:
+    id             primary key
+    follower_id    foreign key to User; account doing the following
+    following_id   foreign key to User; account being followed
+    created_at     timestamp when the follow was made
+
+Constraints:
+    Unique pair (follower_id, following_id), so the same follow cannot repeat.
+    Prevent a user from following themselves.
+
+User search does not need a separate model: search User.username and, when
+useful, Profile.display_name. Add database indexes if search volume requires it.
+
+5. Conversation
+---------------
+Purpose:
+    Groups the messages in a direct conversation. A separate participant table
+    makes it possible to query a user's inbox and enforce membership.
+
+Fields:
+    id             primary key
+    created_at     timestamp when the conversation was created
+
+6. ConversationParticipant
+--------------------------
+Purpose:
+    Joins users to conversations and records each participant's inbox state.
+
+Fields:
+    id             primary key
+    conversation_id foreign key to Conversation
+    user_id        foreign key to User
+    joined_at      timestamp when the user joined
+    last_read_at   optional timestamp for unread-message tracking
+
+Constraints:
+    Unique pair (conversation_id, user_id).
+    For one-to-one direct messages, create conversations with exactly two users
+    and prevent duplicate conversations for the same pair in application logic.
+
+7. Message
+----------
+Purpose:
+    Stores a message sent inside a conversation.
+
+Fields:
+    id             primary key
+    conversation_id foreign key to Conversation
+    sender_id      foreign key to User
+    text           message body; allow blank only if attachments are supported
+    created_at     timestamp when the message was sent
+    edited_at      optional timestamp of the latest edit
+
+Validate that sender_id belongs to the conversation before accepting a
+message. Add a database index on (conversation_id, created_at) for inbox
+conversation history ordering.
+
+Feature-to-model map
+--------------------
+Post photos/videos: Post
+Public feed: query Post by visibility and created_at; no separate Feed table
+Edit profile: Profile (and selected built-in User fields)
+Reset password: Django built-in auth flow; no custom model
+Message another user: Conversation, ConversationParticipant, Message
+Search users: query User and Profile; no separate Search table
+Follow users: Follow
+
+Implementation notes
+--------------------
+The current project has an app/models.py but no custom models yet. Add "app"
+to INSTALLED_APPS in Insta/settings.py before creating migrations for these
+models. Configure MEDIA_ROOT and MEDIA_URL for uploaded files, and use durable
+media storage in production. Use settings.AUTH_USER_MODEL in foreign keys if
+the project may later switch to a custom user model.
