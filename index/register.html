@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f8f89">
+    <title>Create an account | Insta</title>
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+</head>
+<body>
+    <main class="auth-layout">
+        <section class="brand-panel" aria-label="Welcome">
+            <a class="brand brand-light" href="{% url 'login' %}" aria-label="Insta home">
+                <span class="brand-icon" aria-hidden="true">i</span>
+                <span>insta</span>
+            </a>
+            <div class="brand-message">
+                <p class="eyebrow">Your people are here</p>
+                <h1>Make room<br>for more.</h1>
+                <p class="brand-description">Create your account and start sharing the little things that bring us together.</p>
+            </div>
+            <div class="brand-decoration" aria-hidden="true">
+                <span class="decoration-orb orb-one"></span>
+                <span class="decoration-orb orb-two"></span>
+                <span class="decoration-orb orb-three"></span>
+            </div>
+            <p class="panel-footer">Share your moments. Stay connected.</p>
+        </section>
+
+        <section class="form-panel" aria-labelledby="form-title">
+            <div class="auth-card">
+                <a class="brand brand-mobile" href="{% url 'login' %}" aria-label="Insta home">
+                    <span class="brand-icon" aria-hidden="true">i</span>
+                    <span>insta</span>
+                </a>
+                <p class="eyebrow form-eyebrow">Join the community</p>
+                <h2 id="form-title">Create your account</h2>
+                <p class="form-intro">A few details and you’re ready to go.</p>
+
+                <form class="auth-form">
+                    <div class="field">
+                        <label for="full-name">Full name</label>
+                        <input id="full-name" name="full_name" type="text" placeholder="Your full name" autocomplete="name">
+                    </div>
+                    <div class="field">
+                        <label for="last-name">Last name</label>
+                        <input id="last-name" name="last_name" type="text" placeholder="Your last name" autocomplete="family-name">
+                    </div>
+                    <div class="field">
+                        <label for="email">Email address</label>
+                        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email">
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label for="confirm-password">Confirm password</label>
+                        <input id="confirm-password" name="confirm_password" type="password" placeholder="Enter your password again" autocomplete="new-password">
+                    </div>
+                    <button class="primary-button" type="button">Register</button>
+                </form>
+
+                <p class="switch-prompt">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+            </div>
+            <p class="legal-note">By creating an account, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+        </section>
+    </main>
+</body>
+</html>

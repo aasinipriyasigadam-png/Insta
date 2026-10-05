@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
-# Create your views here.
 def homepage(request):
-    return render(request, 'Insta')
+    return render(request, "home.html")
+
+
+def registration(request):
+    return render(request, "register.html")
